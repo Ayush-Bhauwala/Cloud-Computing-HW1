@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import socket
 from datetime import datetime
+from dotenv import load_dotenv
 
 from typing import Dict, List
 from uuid import UUID
@@ -15,6 +16,9 @@ from models.person import PersonCreate, PersonRead, PersonUpdate, UNIType
 from models.address import AddressCreate, AddressRead, AddressUpdate
 from models.health import Health
 from models.course import CourseCreate, CourseRead, CourseUpdate, CourseNumberType
+from models.department import DepartmentCreate, DepartmentRead, DepartmentUpdate
+
+load_dotenv()
 
 port = int(os.environ.get("FASTAPIPORT", 8000))
 
@@ -24,6 +28,7 @@ port = int(os.environ.get("FASTAPIPORT", 8000))
 persons: Dict[UUID, PersonRead] = {}
 addresses: Dict[UUID, AddressRead] = {}
 courses: Dict[UUID, CourseRead] = {}
+departments: Dict[UUID, DepartmentRead] = {}
 
 app = FastAPI(
     title="Person/Address API",
@@ -209,7 +214,7 @@ def list_courses(
 @app.post("/courses", response_model=CourseRead, status_code=201)
 def create_course(course: CourseCreate):
     course_read = CourseRead(**course.model_dump())
-    persons[course.id] = course_read
+    persons[course_read.id] = course_read
     return course_read
 
 
@@ -220,8 +225,54 @@ def get_course(course_id: UUID):
     return courses[course_id]
 
 
-# @app.put("/courses/{course_id}")
-# @app.delete("/courses/{course_id}")
+@app.put("/courses/{course_id}", response_model=CourseRead)
+def update_course(course_id: UUID, course_update: CourseUpdate):
+    raise HTTPException(status_code=501, detail="Method not implemented")
+
+
+@app.delete("/courses/{course_id}")
+def delete_course(course_id: UUID):
+    raise HTTPException(status_code=501, detail="Method not implemented")
+
+
+# -----------------------------------------------------------------------------
+# Department endpoints
+# -----------------------------------------------------------------------------
+@app.get("/departments", response_model=List[DepartmentRead])
+def list_departments(
+    department_code: Optional[str] = Query(
+        None, description="Filter by department code."
+    ),
+    name: Optional[str] = Query(None, description="Filter by department name."),
+    head_of_dept: Optional[str] = Query(
+        None, description="Filter by UNI of head of department"
+    ),
+):
+    raise HTTPException(status_code=501, detail="Method not implemented")
+
+
+@app.post("/departments", response_model=DepartmentRead, status_code=201)
+def create_department(dept: DepartmentCreate):
+    dept_read = DepartmentRead(**dept.model_dump())
+    departments[dept_read.id] = dept_read
+    return dept_read
+
+
+@app.get("/departments/{dept_id}", response_model=DepartmentRead)
+def get_department(dept_id: UUID):
+    if dept_id not in departments:
+        raise HTTPException(status_code=404, detail="Department not found")
+    return departments[dept_id]
+
+
+@app.put("/departments/{dept_id}", response_model=DepartmentRead)
+def update_department(dept_id: UUID, dept_update: DepartmentUpdate):
+    raise HTTPException(status_code=501, detail="Method not implemented")
+
+
+@app.delete("/departments/{dept_id}")
+def delete_department(dept_id: UUID):
+    raise HTTPException(status_code=501, detail="Method not implemented")
 
 
 # -----------------------------------------------------------------------------

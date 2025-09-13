@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from typing import Optional, Annotated
 from uuid import UUID, uuid4
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field, StringConstraints
 
-from .person import PersonBase, UNIType
+from .person import UNIType
 
-CourseNumberType = Annotated[str, StringConstraints(pattern=r"^[a-z]{2,3}\d{1,4}$")]
+# Columbia University Course Number Format: 4 letter for the department followed by 4 digits for the course number and a letter
+# Ex: COMS4153W
+CourseNumberType = Annotated[str, StringConstraints(pattern=r"^[A-Z]{4}\d{4}[A-Z]$")]
 
 class CourseBase(BaseModel):
     course_number: CourseNumberType = Field(
@@ -114,12 +116,12 @@ class CourseRead(CourseBase):
         json_schema_extra={"example": "99999999-9999-4999-8999-999999999999"},
     )
     created_at: datetime = Field(
-        default_factory=datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Creation timestamp (UTC).",
         json_schema_extra={"example": "2025-01-15T10:20:30Z"},
     )
     updated_at: datetime = Field(
-        default_factory=datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Last update timestamp (UTC).",
         json_schema_extra={"example": "2025-01-16T12:00:00Z"},
     )
