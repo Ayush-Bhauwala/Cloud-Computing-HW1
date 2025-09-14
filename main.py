@@ -207,14 +207,25 @@ def list_courses(
         None, description="Filter by minimum course strength"
     ),
 ):
-    # return NotImplemented
-    raise HTTPException(status_code=501, detail="Method not implemented")
+    filtered_list = list(courses.values())
+    if course_number:
+        filtered_list=[course for course in filtered_list if course.course_number==course_number]
+    if name:
+        filtered_list=[course for course in filtered_list if course.name==name]
+    if professor_uni:
+        filtered_list=[course for course in filtered_list if course.professor_uni==professor_uni]
+    if credits:
+        filtered_list=[course for course in filtered_list if course.credits==credits]
+    if min_strength:
+        filtered_list=[course for course in filtered_list if course.strength>=min_strength]
+    return filtered_list
+
 
 
 @app.post("/courses", response_model=CourseRead, status_code=201)
 def create_course(course: CourseCreate):
     course_read = CourseRead(**course.model_dump())
-    persons[course_read.id] = course_read
+    courses[course_read.id] = course_read
     return course_read
 
 
@@ -232,7 +243,9 @@ def update_course(course_id: UUID, course_update: CourseUpdate):
 
 @app.delete("/courses/{course_id}")
 def delete_course(course_id: UUID):
-    raise HTTPException(status_code=501, detail="Method not implemented")
+    if course_id not in courses:
+        raise HTTPException(status_code=404, detail="Course not found")
+    del courses[course_id]
 
 
 # -----------------------------------------------------------------------------
